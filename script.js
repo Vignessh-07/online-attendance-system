@@ -2,19 +2,19 @@ document.getElementById("attendanceForm").addEventListener("submit", function(e)
   e.preventDefault();
 
   const name = document.getElementById("name").value;
-  const roll = document.getElementById("roll").value;
+  const rollNumber = document.getElementById("rollNumber").value;
 
   // Send data to backend using fetch()
-  fetch("http://localhost:3000/mark-attendance", {
+  fetch("http://localhost:3000/submit", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ name, roll })
+    body: JSON.stringify({ name, rollNumber })
   })
   .then(response => response.json())
   .then(data => {
-    document.getElementById("message").innerText = data.message;
+    document.getElementById("message").innerText = data.message || data.error;
     document.getElementById("attendanceForm").reset();
   })
   .catch(error => {
@@ -25,11 +25,16 @@ document.getElementById("attendanceForm").addEventListener("submit", function(e)
 
 function toggleAttendance() {
   const container = document.getElementById("attendanceContainer");
-  container.style.display = container.style.display === "none" ? "block" : "none";
+  if (container.style.display === "none") {
+    fetchAttendance();
+    container.style.display = "block";
+  } else {
+    container.style.display = "none";
+  }
 }
 
 function fetchAttendance() {
-  fetch("http://localhost:3000/get-attendance")
+  fetch("http://localhost:3000/attendance")
     .then(response => response.json())
     .then(data => {
       const tableBody = document.getElementById("attendanceTableBody");
@@ -46,7 +51,7 @@ function fetchAttendance() {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${entry.name}</td>
-          <td>${entry.roll}</td>
+          <td>${entry.rollNumber}</td>
           <td>${entry.date}</td>
         `;
         tableBody.appendChild(row);
